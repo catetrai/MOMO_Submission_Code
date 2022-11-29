@@ -91,7 +91,7 @@ def getDirectoryList(path):
         return []
 
     #add path to directoryList if it contains .dcm files
-    if len([f for f in os.listdir(path) if f.endswith('.dcm')])>0:
+    if len([f for f in os.listdir(path) if not f.endswith('.png')])>0:
         directoryList.append(path)
 
     for d in os.listdir(path):

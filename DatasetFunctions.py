@@ -276,9 +276,28 @@ def make_representation_from_unknown(current_image, target_size, verbose = False
         s1 = 0
         s2 = np.floor((temp.shape[0]-1)/2).astype(int)
         s3 = -1
-        new_image = np.vstack([np.expand_dims(temp[s1,:,:], axis=0),
-                               np.expand_dims(temp[s2,:,:], axis=0),
-                               np.expand_dims(temp[s3,:,:], axis=0)]).astype(np.float32)
+
+        # DEBUG: apply MIP to 2D images as well
+        new_image = np.stack((np.max(temp, axis=0),
+                              np.max(temp, axis=0),
+                              np.max(temp, axis=0)), axis=0)#.astype(np.float32)
+        #new_image = np.vstack([np.expand_dims(temp[s1,:,:], axis=0),
+        #                       np.expand_dims(temp[s2,:,:], axis=0),
+        #                       np.expand_dims(temp[s3,:,:], axis=0)]).astype(np.float32)
+
+        # DEBUG: save image as NIFTI for visual inspection
+        #print(new_image.shape)
+        #plt.imshow(new_image[0,:,:], cmap="gray")
+        #plt.show()
+        #plt.savefig( "/tmp/pacs-scraper/test_img_MIP.png")
+        #result_image = sitk.GetImageFromArray(new_image)
+        #result_image.CopyInformation(temp)
+        #sitk.WriteImage(result_image, "/tmp/pacs-scraper/test_img_MIP.nii.gz")
+        new_image = new_image.astype(np.float32)
+
+        #new_image = np.vstack([np.expand_dims(temp[s1,:,:], axis=0),
+        #                       np.expand_dims(temp[s2,:,:], axis=0),
+        #                       np.expand_dims(temp[s3,:,:], axis=0)]).astype(np.float32)
         
     elif dim >= 3 and np.size(temp, -3) > lim2d:
         new_image = np.stack((np.max(temp, axis=-1),

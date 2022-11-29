@@ -1254,7 +1254,9 @@ def PredictStudy_0(meta_dict, mapfile, network, verbose=False, local=True, split
     
     # Unpack critical metadata
     try:
+        print(meta_dict)
         Code = meta_dict["Procedure Code"][0].value
+        #Code = "dummy"
         STDesc = meta_dict["Study Description"][0].value
         SEModas = [item for item in meta_dict["Series Modality"]]
     except KeyError as k:

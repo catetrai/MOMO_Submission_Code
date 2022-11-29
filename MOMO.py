@@ -80,6 +80,7 @@ try:
                                                      **config_kwargs)
 except:
     print("uh oh")
+    raise
 finally:
     print(exitcode, result, error)
 

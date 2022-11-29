@@ -405,7 +405,7 @@ def select_training_data(img_src, meta_src, img_dest, meta_dest, s_map, f_map='.
     for i in range(len(tFL)):
         meta_read = pydicom.filereader.dcmread(str(meta_src)+"/"+str(mFL[i]))
         ismod = meta_read["0x0008", "0x0060"].value
-        data, f_target = torch.load(str(img_src)+"/"+str(tFL[i]))
+        data, f_target = torch.load(str(img_src)+"/"+str(tFL[i]), map_location=torch.device('cpu'))
         desc = f_mapping["Internal"]["Desc"][str(f_target)]
         if desc in dcv and (keep_pet or ismod != "PT"):
             s_target = dck[dcv.index(desc)]
@@ -451,7 +451,7 @@ class LAZY_Dataset(torch.utils.data.Dataset):
     
     def __getitem__(self, idx):
         # load tensor from directory
-        data, target = torch.load(self.data_root+'preprocessed/MM_'+str(idx).zfill(8)+'.pth')
+        data, target = torch.load(self.data_root+'preprocessed/MM_'+str(idx).zfill(8)+'.pth', map_location=torch.device('cpu'))
         
         # apply random transformations
         if self.custom_transform:

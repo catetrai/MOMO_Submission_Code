@@ -32,8 +32,8 @@ from tqdm import tqdm
 import pydicom
 import SimpleITK as sitk
 
-#device = torch.device("cpu")
-device = torch.device("cuda")# if torch.cuda.is_available() else "cpu")
+device = torch.device("cpu")
+#device = torch.device("cuda")# if torch.cuda.is_available() else "cpu")
 
 def representation(SEFN):
     """

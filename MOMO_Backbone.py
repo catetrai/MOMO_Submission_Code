@@ -644,7 +644,8 @@ def PredictSeriesWithNetwork(STModa, SEDesc, SEModa, SEFN, SEID, mapfile, networ
     
     with torch.no_grad():
         # load network
-        net = torch.load(network)
+        net = torch.load(network, map_location=torch.device('cpu'))
+        net.cpu()
         # set to eval mode
         net.eval()
         # collect results
@@ -658,6 +659,7 @@ def PredictSeriesWithNetwork(STModa, SEDesc, SEModa, SEFN, SEID, mapfile, networ
                     print("Error in custom network predictor function: ", e)
                 return 0, 0, None
         else:
+            tensor_representation = tensor_representation.to(torch.device('cpu'))
             logits = net(tensor_representation)
             if verbose:
                 print(logits)
@@ -3535,6 +3537,7 @@ def CDtoPrediction(data_root, known_metas, mapfile, network, verbose=False, reco
             exitcode = 0
         return exitcode, (prediction, decider), None
     except Exception as e:
+        raise e
         if verbose:
             print("Error in predictor!")
             print(repr(e))

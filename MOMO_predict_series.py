@@ -112,7 +112,7 @@ def main():
 
     if args.study_dirs:
         all_series = (d for study_dir in args.study_dirs for d in Path(study_dir).iterdir() if d.is_dir())
-    else if args.series_dirs:
+    elif args.series_dirs:
         all_series = args.series_dirs
     else:
         raise ValueError("Must specify either '--study-dirs' or '--series-dirs'")

@@ -109,9 +109,9 @@ def main():
     )
     path_args_group = parser.add_mutually_exclusive_group(required=True)
     path_args_group.add_argument(
-        "--study-dirs",
-        nargs="+",
-        help="One or more directory paths containing DICOM series directories",
+        "--series-paths-file",
+        type=argparse.FileType("r", encoding="utf-8"),
+        help="TXT file listing DICOM series directory paths (one path per line)",
     )
     path_args_group.add_argument(
         "--series-dirs",
@@ -152,12 +152,12 @@ def main():
         writer = csv.DictWriter(args.csv_file, fieldnames=columns)
         writer.writeheader()
 
-    if args.study_dirs:
-        all_series = (d for study_dir in args.study_dirs for d in Path(study_dir).iterdir() if d.is_dir())
+    if args.series_paths_file:
+        all_series = (line.rstrip("\n") for line in args.series_paths_file.readlines())
     elif args.series_dirs:
         all_series = args.series_dirs
     else:
-        raise ValueError("Must specify either '--study-dirs' or '--series-dirs'")
+        raise ValueError("Must specify either '--series-paths-file' or '--series-dirs'")
         
 
     results_all = {}

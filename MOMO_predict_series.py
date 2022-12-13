@@ -72,11 +72,27 @@ def predict_series(series_path, verbose=True) -> dict:
         **config_kwargs
     )
 
+    body_part_codes = {
+        "MRS": "HEAD",
+        "MRSH": "HEADNECK",
+        "MRA": "ABDOMEN",
+        "MRB": "TSPINE",
+        "MRBE": "PELVIS",
+        "MRH": "CSPINE",
+        "MRL": "LSPINE",
+        "MRM": "BREAST",
+        "MROE": "UPPER_EXT",
+        "MRTH": "CHEST",
+        "MRUE": "LOWER_EXT",
+        "MRWB": "WHOLE_BODY",
+        "MRWS": "SPINE",
+    }
+
     return {
         "series_instance_uid": series_ids[0],
         "dir_path": series_path,
         "eligibility": eligibility,
-        "prediction": prediction,
+        "prediction": body_part_codes.get(prediction),
         "probability": probability
     }
 

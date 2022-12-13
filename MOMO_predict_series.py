@@ -160,14 +160,15 @@ def main():
         raise ValueError("Must specify either '--study-dirs' or '--series-dirs'")
         
 
-    results_all = []
+    results_all = {}
     for series_dir in all_series:
         logging.debug("Predicting series '%s'", series_dir)
         results = {}
 
         try:
             results = predict_series(str(series_dir), verbose=False)
-            results_all.append(results)
+            if "dir_path" in results:
+                results_all[results["dir_path"]] = {k: results[k] for k in ("eligibility", "prediction", "probability")}
 
             if args.csv_file:
                 writer.writerow(results)

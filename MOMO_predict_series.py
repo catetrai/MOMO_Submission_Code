@@ -70,6 +70,7 @@ def predict_series(series_path, verbose=True) -> dict:
 
     return {
         "series_instance_uid": series_ids[0],
+        "dir_path": series_path,
         "eligibility": eligibility,
         "prediction": prediction,
         "probability": probability
@@ -98,9 +99,9 @@ def main():
     )
     args = parser.parse_args()
 
-    columns = ["series_instance_uid", "eligibility", "prediction", "probability"]
     writer = csv.DictWriter(args.csv_file, fieldnames=columns)
     writer.writeheader()
+    columns = ["series_instance_uid", "dir_path", "eligibility", "prediction", "probability"]
 
     for patient_dir in args.patient_dirs:
         all_series = (d for d in Path(patient_dir).glob("*/*") if d.is_dir())

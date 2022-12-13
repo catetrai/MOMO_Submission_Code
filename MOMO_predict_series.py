@@ -87,34 +87,50 @@ def main():
             """
         ),
     )
-    parser.add_argument(
-        "patient_dirs",
+    path_args_group = parser.add_mutually_exclusive_group(required=True)
+    path_args_group.add_argument(
+        "--study-dirs",
         nargs="+",
-        help="One or more paths to patient-level DICOM directories",
+        help="One or more directory paths containing DICOM series directories",
+    )
+    path_args_group.add_argument(
+        "--series-dirs",
+        nargs="+",
+        help="One or more DICOM series directory paths containing DICOM image files",
     )
     parser.add_argument(
-        "csv_file",
+        "--csv-file",
         type=argparse.FileType("w", encoding="utf-8"),
-        help="Output CSV file to be written",
+        help="Optional CSV file where results will be written (by default, writes to stdout)",
     )
     args = parser.parse_args()
 
-    writer = csv.DictWriter(args.csv_file, fieldnames=columns)
-    writer.writeheader()
     columns = ["series_instance_uid", "dir_path", "eligibility", "prediction", "probability"]
+    if args.csv_file:
+        writer = csv.DictWriter(args.csv_file, fieldnames=columns)
+        writer.writeheader()
 
-    for patient_dir in args.patient_dirs:
-        all_series = (d for d in Path(patient_dir).glob("*/*") if d.is_dir())
+    if args.study_dirs:
+        all_series = (d for study_dir in args.study_dirs for d in Path(study_dir).iterdir() if d.is_dir())
+    else if args.series_dirs:
+        all_series = args.series_dirs
+    else:
+        raise ValueError("Must specify either '--study-dirs' or '--series-dirs'")
+        
 
-        for series_dir in all_series:
-            print(series_dir)
-            results = {}
-            try:
-                results = predict_series(str(series_dir), verbose=False)
-                print(results)
+    for series_dir in all_series:
+        print(series_dir)
+        results = {}
+
+        try:
+            results = predict_series(str(series_dir), verbose=False)
+            print(results)
+
+            if args.csv_file:
                 writer.writerow(results)
-            except Exception as ex:
-                print(f"ERROR: {ex}")
+
+        except Exception as ex:
+            print(f"ERROR: {ex}")
 
 
 if __name__ == "__main__":

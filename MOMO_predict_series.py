@@ -1,5 +1,7 @@
 import csv
+import json
 import sys
+import logging
 import argparse
 from pathlib import Path
 from textwrap import dedent
@@ -10,6 +12,8 @@ from MOMO_Backbone import (
     from_config,
     meta
 )
+import SimpleITK as sitk
+
 # Hardcoded imports of the network classes the paper uses for MOMO (Pickle needs these available in the top level namespace)
 from ipynb.fs.defs.TransferRes import *
 from ipynb.fs.defs.TransferDense import *
@@ -83,7 +87,7 @@ def main():
         description=dedent(
             """
             Predict body part for MRI series under a given directory
-            and write results to a CSV file.
+            and optionally write results to a CSV file.
             """
         ),
     )
@@ -103,7 +107,29 @@ def main():
         type=argparse.FileType("w", encoding="utf-8"),
         help="Optional CSV file where results will be written (by default, writes to stdout)",
     )
+    parser.add_argument(
+        "-d",
+        "--debug",
+        action="store_true",
+        help="Enable debug logging"
+    )
+    parser.add_argument(
+        "-q",
+        "--quiet",
+        action="store_true",
+        help="Disable log output"
+    )
     args = parser.parse_args()
+
+
+    if args.debug:
+        logging.basicConfig(format="%(asctime)s [%(levelname)-8s] %(message)s",
+                            level=logging.DEBUG)
+    if args.quiet:
+        logging.getLogger().disabled = True
+        # Disable SimpleITK warnings when reading images
+        sitk.ProcessObject_SetGlobalWarningDisplay(False)
+
 
     columns = ["series_instance_uid", "dir_path", "eligibility", "prediction", "probability"]
     if args.csv_file:
@@ -118,19 +144,23 @@ def main():
         raise ValueError("Must specify either '--study-dirs' or '--series-dirs'")
         
 
+    results_all = []
     for series_dir in all_series:
-        print(series_dir)
+        logging.debug("Predicting series '%s'", series_dir)
         results = {}
 
         try:
             results = predict_series(str(series_dir), verbose=False)
-            print(results)
+            results_all.append(results)
 
             if args.csv_file:
                 writer.writerow(results)
 
         except Exception as ex:
-            print(f"ERROR: {ex}")
+            logging.error("Error predicting series '%s'", series_dir)
+            logging.exception(ex)
+
+    print(json.dumps(results_all))
 
 
 if __name__ == "__main__":
